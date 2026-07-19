@@ -1,43 +1,45 @@
 # data/psicoticos_alimentarios.py
 
-TRASTORNOS_PSICOTICOS_ALIMENTARIOS = [
+TRASTORNOS_PSIC_ALIM = [
     {
-        "id": 7,
+        "id": 20,
         "nombre": "Esquizofrenia",
         "cie10": "F20.9",
-        "categoria": "Espectro de la Esquizofrenia y otros Trastornos Psicóticos",
-        "guia_diferencial": "Diferenciar del Trastorno Esquizoafectivo (requiere un episodio mayor del estado de ánimo simultáneo) y de trastornos debidos a efectos fisiológicos de una sustancia.",
+        "categoria": "Espectro de la Esquizofrenia y otros Trastornos Psicoticos",
+        "guia_diferencial": "Diferenciar de: 1. Trastorno Esquizoafectivo (los sintomas afectivos duran la mayor parte del tiempo de la enfermedad; en la esquizofrenia son transitorios). 2. Trastorno Delirante (esta dominado por ideas delirantes no extravagantes, sin alucinaciones auditivas complejas ni desorganizacion del lenguaje).",
         "criterios": [
-            ("A1", "Delirios (creencias fijas no susceptibles de cambio a la luz de pruebas en contra)."),
-            ("A2", "Alucinaciones (percepciones que tienen lugar sin la presencia de un estímulo externo)."),
-            ("A3", "Discurso desorganizado (ej. descarrilamiento frecuente o incoherencia)."),
-            ("A4", "Comportamiento muy desorganizado o catatónico."),
-            ("A5", "Síntomas negativos (expresión emotiva disminuida o abulia)."),
-            ("B", "El funcionamiento en uno o más campos principales (trabajo, relaciones, cuidado propio) está muy por debajo del nivel alcanzado antes del inicio.")
+            ("A1", "Ideas delirantes fijas e inconmovibles frente a la realidad (persecucion, grandeza, referencia)."),
+            ("A2", "Alucinaciones vividas y claras, habitualmente auditivas (escuchar voces que hablan entre si)."),
+            ("A3", "Lenguaje desorganizado, descarrilamiento frecuente, incoherencia notable o habla incomprensible."),
+            ("A4", "Comportamiento muy desorganizado o catatonico (agitacion sin sentido, posturas rigidas)."),
+            ("A5", "Sintomas negativos como expresion emocional disminuida (aplanamiento afectivo) o abulia (falta de iniciativa).")
         ]
     },
     {
-        "id": 8,
-        "nombre": "Trastorno Delirante",
-        "cie10": "F22",
-        "categoria": "Espectro de la Esquizofrenia y otros Trastornos Psicóticos",
-        "guia_diferencial": "A diferencia de la esquizofrenia, nunca se ha cumplido el Criterio A de la esquizofrenia; las alucinaciones, si existen, no son prominentes y guardan relación con el tema delirante.",
-        "criterios": [
-            ("A", "Presencia de uno o más delirios de un mes o más de duración."),
-            ("B", "Nunca se ha cumplido el Criterio A de la Esquizofrenia."),
-            ("C", "Aparte del impacto de los delirios, el funcionamiento no está muy alterado y el comportamiento no es manifiestamente extravagante.")
-        ]
-    },
-    {
-        "id": 9,
+        "id": 21,
         "nombre": "Anorexia Nerviosa",
         "cie10": "F50.01",
-        "categoria": "Trastornos de la Conducta Alimentaria y de la Ingesta de Alimentos",
-        "guia_diferencial": "Diferenciar de afecciones médicas (ej. enfermedad de Crohn), Trastorno Depresivo Mayor (donde la pérdida de peso no se asocia a distorsión de la imagen corporal) o fobia social.",
+        "categoria": "Trastornos de la Conducta Alimentaria",
+        "guia_diferencial": "Diferenciar de: 1. Bulimia Nerviosa (los pacientes mantienen un peso corporal igual o por encima del limite minimo normal). 2. Trastorno de Ansiedad Social (el miedo se limita a la evaluacion social general, no exclusivamente al pavor a engordar y a la distorsion de la silueta).",
         "criterios": [
-            ("A", "Restricción de la ingesta energética en relación con las necesidades, que conduce a un peso corporal significativamente bajo."),
-            ("B", "Miedo intenso a ganar peso o a engordar, o comportamiento persistente que interfiere en el aumento de peso."),
-            ("C", "Alteración en la forma en que uno mismo percibe su propio peso o constitución (distorsión de la imagen corporal).")
+            ("A1", "Restriccion de la ingesta energetica en relacion con las necesidades, que conduce a un peso corporal significativamente bajo."),
+            ("B1", "Miedo intenso a ganar peso o a engordar, o comportamiento persistente que interfiere en el aumento de peso."),
+            ("C1", "Alteracion en la forma en que uno mismo percibe su propio peso o constitucion (distorsion de la autoimagen)."),
+            ("C2", "Falta persistente de reconocimiento de la gravedad del bajo peso corporal actual.")
+        ]
+    },
+    {
+        "id": 22,
+        "nombre": "Bulimia Nerviosa",
+        "cie10": "F50.2",
+        "categoria": "Trastornos de la Conducta Alimentaria",
+        "guia_diferencial": "Diferenciar de: 1. Trastorno por Atracon (no se presentan conductas compensatorias inapropiadas como el vomito o uso de laxantes). 2. Anorexia de tipo purgativo (en la bulimia el peso se mantiene en rangos normales o sobrepeso).",
+        "criterios": [
+            ("A1", "Episodios recurrentes de atracones, caracterizados por ingestion de una cantidad de comida superior a la normal en un periodo corto."),
+            ("A2", "Sensacion de falta de control sobre la comida durante el episodio de atracon."),
+            ("B1", "Comportamientos compensatorios inapropiados recurrentes para evitar el aumento de peso como el vomito provocado, uso de laxantes o ayuno."),
+            ("C1", "Los atracones y las conductas compensatorias inapropiadas se producen al menos una vez a la semana durante tres meses."),
+            ("D1", "La autoevaluacion se ve influida indebidamente de manera casi exclusiva por la constitucion y el peso corporal.")
         ]
     }
 ]
