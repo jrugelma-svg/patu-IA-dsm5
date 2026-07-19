@@ -40,9 +40,9 @@ def evaluar_similitud_dsm5(texto_caso):
         - No agregues introducciones, saludos, notas aclaratorias ni textos largos debajo de la tabla. Sé directo, puramente estadístico y cuantitativo.
         """
         
-        # Usamos el modelo insignia de última generación
+        # Usamos el modelo ultra-estable de amplio soporte
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt_clinico,
         )
         return response.text
