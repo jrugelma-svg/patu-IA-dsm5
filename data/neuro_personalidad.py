@@ -1,7 +1,7 @@
-# neuro_personalidad.py
-# ARCHIVO DE PRODUCCIÓN TOTALMENTE CONFIGURADO
+# data/neuro_personalidad.py
 
 TRASTORNOS_NEURO_PERSONALIDAD = [
+    {
         "id": 1,
         "nombre": "Trastorno del Espectro del Autismo (TEA)",
         "cie10": "F84.0",
@@ -12,7 +12,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
             ("A2", "Deficits en conductas comunicativas no verbales utilizadas en la interaccion social, contacto visual y lenguaje corporal."),
             ("A3", "Deficits en el desarrollo, mantenimiento y comprension de las relaciones sociales y ajuste del comportamiento."),
             ("B1", "Movimientos, utilizacion de objetos o habla estereotipados o repetitivos como alineacion de juguetes o ecolalia."),
-            ("B2", "Insistencia en la monotonía, excesiva inflexibilidad de rutinas o patrones ritualizados de comportamiento."),
+            ("B2", "Insistencia en la monotonia, excesiva inflexibilidad de rutinas o patrones ritualizados de comportamiento."),
             ("B3", "Intereses muy restringidos y fijos que son anormales en cuanto a su intensidad o foco de interes."),
             ("B4", "Hiper o hiporreactividad a los estimulos sensoriales o interes inhabitual por aspectos sensoriales del entorno.")
         ]
@@ -30,7 +30,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
             ("A4", "No sigue las instrucciones y falla en terminar las tareas escolares, quehaceres o deberes en el lugar de trabajo."),
             ("A5", "Dificultad para organizar tareas y actividades cotidianas, mala gestion del tiempo y desorganizacion."),
             ("A6", "Evita, le disgusta o es renuente a iniciar tareas que requieren un esfuerzo mental sostenido como informes."),
-            ("A7", "Pierde cosas necesarias para tareas o actividades como materiales escolares, llaves, billetera o telefonos."),
+            ("A7", "Pierde cosas necesarias para tareas o actividades como materiales escolares, llaves, billetera o de oficina."),
             ("A8", "Se distrae con mucha facilidad por estimulos externos, ruidos cotidianos o pensamientos irrelevantes."),
             ("A9", "Olvida las actividades cotidianas, tareas, hacer mandados, pagar cuentas o asistir a citas programadas."),
             ("B1", "Juguetea con o golpea las manos o los pies o se retuerce en el asiento constantemente cuando debe estar quieto."),
@@ -44,7 +44,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
             ("B9", "Interrumpe o se inmiscuye con otros en juegos, conversaciones ajenas o actividades de los demas.")
         ]
     },
-  {
+    {
         "id": 3,
         "nombre": "Trastorno Limite de la Personalidad (TLP)",
         "cie10": "F60.3",
@@ -67,7 +67,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
         "nombre": "Trastorno de la Personalidad Antisocial",
         "cie10": "F60.2",
         "categoria": "Trastornos de la Personalidad",
-        "guia_diferencial": "Diferenciar de: 1. Trastorno por consumo de sustancias (la conducta antisocial debe manifestarse tambien fuera de los periodos de intoxicacion o abstinencia). 2. Trastorno de la Personalidad Narcisista (no incluye el historial de trastornos de la conducta en la infancia ni la agresividad fisica del antisocial).",
+        "guia_diferencial": "Diferenciar de: 1. Trastorno por consumo de sustancias (la conducta antisocial debe manifestarse tambien fuera de los periodos de intoxicacion). 2. Trastorno de la Personalidad Narcisista (no incluye el historial de trastornos de la conducta en la infancia ni la agresividad fisica del antisocial).",
         "criterios": [
             ("A1", "Incumplimiento de las normas sociales respecto a los comportamientos legales, actuaciones repetidas que son motivo de detencion."),
             ("A2", "Engaño que se manifiesta por mentiras repetidas, utilizacion de alias o estafa para provecho o placer personal."),
@@ -78,7 +78,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
             ("A7", "Ausencia de remordimiento que se manifiesta con indiferencia o racionalizacion del hecho de haber herido, maltratado o robado.")
         ]
     },
- {
+    {
         "id": 5,
         "nombre": "Trastorno de la Personalidad Narcisista",
         "cie10": "F60.81",
@@ -87,7 +87,7 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
         "criterios": [
             ("A1", "Tiene sentimientos de grandeza y prepotencia, exagera sus logros y talentos inesperadamente."),
             ("A2", "Esta absorto en fantasias de exito ilimitado, poder, brillantez, belleza o amor ideal."),
-            ("A3", "Cree que es especial y unico y que solo pueden comprenderle otras personas especiales."),
+            ("A3", "Cree que es especial y unico y que solo pueden comprenderle otras personas especiales o de alto estatus."),
             ("A4", "Tiene una necesidad excesiva de admiracion, atencion y aplausos de los demas."),
             ("A5", "Muestra un sentimiento de privilegio, expectativas irrazonables de recibir un trato de favor."),
             ("A6", "Explota las relaciones interpersonales, se aprovecha de los demas para sus propios fines."),
@@ -113,4 +113,4 @@ TRASTORNOS_NEURO_PERSONALIDAD = [
             ("A8", "Considera que las relaciones son mas estrechas e intimas de lo que lo son en realidad.")
         ]
     }
-]   
+]
