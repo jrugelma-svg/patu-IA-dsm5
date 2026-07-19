@@ -16,12 +16,13 @@ st.write("Analiza el nivel de concordancia y similitud de un caso clínico con l
 # ==========================================
 # 2. CONEXIÓN REAL CON GOOGLE GEMINI
 # ==========================================
-# Coloca aquí tu clave de API de Google AI Studio dentro de las comillas
+# Tu clave API ya está colocada correctamente aquí adentro entre las comillas:
 API_KEY = "AQ.Ab8RN6LVcdf6oUMMsXSLF8x8o_-S0MpL_2Cxr9YTwsXpws1dng"
 
 def evaluar_similitud_dsm5(texto_caso):
     try:
-        client = genai.Client(api_key=API_KEY)
+        # Inicializamos el cliente forzando la API v1 estable para evitar el error 404
+        client = genai.Client(api_key=API_KEY, http_options={'api_version': 'v1'})
         
         prompt_clinico = f"""
         Actúa como un psicólogo clínico experto y un algoritmo de cribado psicopatológico.
@@ -34,13 +35,14 @@ def evaluar_similitud_dsm5(texto_caso):
         | Trastorno Sospechado (DSM-5) | % Similitud | Criterios Clave Coincidentes | Justificación Breve |
         
         Reglas estrictas:
-        - Ordena la tabla de mayor a menor porcentaje.
-        - Incluye de 2 a 4 trastornos diferenciales que muestren alguna similitud.
-        - No agregues introducciones, saludos ni textos largos debajo de la tabla. Sé directo y cuantitativo.
+        - Ordena la tabla de mayor a menor porcentaje de similitud.
+        - Incluye de 2 a 4 trastornos diferenciales que muestren alguna similitud o con los que se pueda confundir.
+        - No agregues introducciones, saludos, notas aclaratorias ni textos largos debajo de la tabla. Sé directo, puramente estadístico y cuantitativo.
         """
         
+        # Usamos el modelo insignia de última generación
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-2.5-flash',
             contents=prompt_clinico,
         )
         return response.text
@@ -68,7 +70,6 @@ with tabs[0]:
             st.warning("Por favor, ingresa un texto para realizar la evaluación.")
         else:
             with st.spinner("Calculando índices de similitud con el DSM-5..."):
-                # Aquí llamamos a la nueva función matemática/clínica
                 tabla_resultados = evaluar_similitud_dsm5(caso_clinico)
                 st.success("¡Cálculo de similitud finalizado!")
                 st.markdown(tabla_resultados)
