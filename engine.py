@@ -128,34 +128,32 @@ STOP_WORDS = {
 # 4. MOTOR DE ANALÍTICA Y CÁLCULO DE RELEVANCIA (SCORING)
 # =====================================================================
 def analizar_caso_patu(descripcion_caso):
-    """
-    Analiza clínicamente la descripción del caso ingresado por el usuario.
-    Calcula un Score híbrido basado en expansión léxico-semántica y
-    cobertura de criterios del DSM-5.
-    """
     if not descripcion_caso:
         return []
 
     texto_limpio = normalizar_texto(descripcion_caso)
     palabras_usuario = texto_limpio.split()
 
-    tokens_base = []
+    # Construimos el set de búsqueda léxica del usuario
+    tokens_busqueda = set()
     for pal in palabras_usuario:
         if pal not in STOP_WORDS:
-            tokens_base.append(extraer_raices(pal))
-
-    tokens_expandidos = set(tokens_base)
-    for pal in palabras_usuario:
+            tokens_busqueda.add(pal)
+            tokens_busqueda.add(extraer_raices(pal))
+        
+        # Expandir semánticamente si coincide con el diccionario coloquial
         if pal in DICCIONARIO_SINTOMAS:
             for sinonimo in DICCIONARIO_SINTOMAS[pal]:
-                tokens_expandidos.add(normalizar_texto(sinonimo))
-                tokens_expandidos.add(extraer_raices(normalizar_texto(sinonimo)))
+                term_norm = normalizar_texto(sinonimo)
+                if term_norm not in STOP_WORDS:
+                    tokens_busqueda.add(term_norm)
+                    tokens_busqueda.add(extraer_raices(term_norm))
 
     conn = sqlite3.connect("patu_db.db")
     cursor = conn.cursor()
-
     cursor.execute("SELECT id, nombre, categoria, descripcion_criterios FROM trastornos")
     trastornos = cursor.fetchall()
+    conn.close()
 
     resultados = []
 
@@ -163,34 +161,28 @@ def analizar_caso_patu(descripcion_caso):
         if not criterios:
             continue
         
-        lista_criterios = [normalizar_texto(c) for c in re.split(r'[.;•\-]', criterios) if len(c.strip()) > 5]
-        
-        coincidencias_totales = 0
+        # Separar en criterios individuales basados en el punto final de cada uno
+        lista_criterios = [normalizar_texto(c) for c in criterios.split('.') if len(c.strip()) > 6]
         criterios_activados = 0
         
         for criterio in lista_criterios:
-            criterio_tokens = criterio.split()
-            criterio_raices = [extraer_raices(t) for t in criterio_tokens if t not in STOP_WORDS]
+            criterio_tokens = set(criterio.split())
+            criterio_raices = {extraer_raices(w) for w in criterio_tokens if w not in STOP_WORDS}
             
-            hits_en_criterio = 0
-            for token in tokens_expandidos:
-                if token in criterio_tokens or token in criterio_raices or any(token in raiz for raiz in criterio_raices):
-                    hits_en_criterio += 1
+            # Buscamos si hay intersección real de conceptos únicos entre el caso y el criterio
+            coincidencias_reales = tokens_busqueda.intersection(criterio_tokens).union(tokens_busqueda.intersection(criterio_raices))
             
-            if hits_en_criterio > 0:
+            # Suma el criterio solo si comparte al menos una palabra clave de peso clínico real
+            if len(coincidencias_reales) >= 1:
                 criterios_activados += 1
-                coincidencias_totales += hits_en_criterio
 
         if criterios_activados == 0 or len(lista_criterios) == 0:
             continue
             
-        factor_cobertura = criterios_activados / len(lista_criterios)
-        factor_frecuencia = math.log1p(coincidencias_totales)
-        
-        score_bruto = (factor_cobertura * 60) + (factor_frecuencia * 40)
-        porcentaje_coincidencia = min(98.5, round(score_bruto, 2))
+        # Ponderación basada estrictamente en la proporción de criterios cubiertos
+        porcentaje_coincidencia = round((criterios_activados / len(lista_criterios)) * 100, 2)
 
-        if porcentaje_coincidencia >= 15.0:
+        if porcentaje_coincidencia >= 10.0:
             resultados.append({
                 "id": t_id,
                 "nombre": nombre,
@@ -199,63 +191,34 @@ def analizar_caso_patu(descripcion_caso):
                 "criterios_match": f"{criterios_activados} de {len(lista_criterios)}"
             })
 
-    conn.close()
     return sorted(resultados, key=lambda x: x["coincidencia"], reverse=True)
 
-
 # =====================================================================
-# 5. CONSULTA DINÁMICA DE FICHAS TÉCNICAS (HÍBRIDA)
+# 5. CONSULTA DINÁMICA DE FICHAS TÉCNICAS
 # =====================================================================
 def consultar_guia_trastorno(trastorno_id):
-    """
-    Recupera la ficha técnica y los criterios clínicos completos del DSM-5
-    directamente desde los módulos de datos estructurados .py (Producción),
-    evitando caídas operativas de SQLite en la nube.
-    """
     try:
-        from data.neuro_personalidad import TRASTORNOS_NEURO_PERS
+        from data.neuro_personalidad import TRASTORNOS_NEURO_PERSONALIDAD
     except ImportError:
-        TRASTORNOS_NEURO_PERS = []
-        
+        TRASTORNOS_NEURO_PERSONALIDAD = []
     try:
         from data.afectivos_ansiedad import TRASTORNOS_AFEC_ANSI
     except ImportError:
         TRASTORNOS_AFEC_ANSI = []
-        
     try:
         from data.psicoticos_alimentarios import TRASTORNOS_PSIC_ALIM
     except ImportError:
         TRASTORNOS_PSIC_ALIM = []
 
-    # Unificar base maestra de objetos .py
-    todos_los_trastornos = TRASTORNOS_NEURO_PERS + TRASTORNOS_AFEC_ANSI + TRASTORNOS_PSIC_ALIM
+    todos_los_trastornos = TRASTORNOS_NEURO_PERSONALIDAD + TRASTORNOS_AFEC_ANSI + TRASTORNOS_PSIC_ALIM
 
-    # Búsqueda directa en memoria por ID
     for t in todos_los_trastornos:
         if t.get("id") == trastorno_id:
             nombre = t.get("nombre", "Desconocido")
             categoria = t.get("categoria", "Sin categoría")
             guia_diferencial = t.get("guia_diferencial", "No disponible.")
-            
             criterios_lista = t.get("criterios", [])
             descripcion_criterios = "\n".join([f"- **{cod}**: {txt}" for cod, txt in criterios_lista])
-            
             return (nombre, categoria, descripcion_criterios, guia_diferencial)
 
-    # PLAN B: Respaldo relacional en Base de Datos local
-    try:
-        conn = sqlite3.connect("patu_db.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT nombre, categoria, descripcion_criterios, guia_diferencial 
-            FROM trastornos WHERE id = ?
-        """, (trastorno_id,))
-        fila = cursor.fetchone()
-        conn.close()
-        if fila:
-            return fila
-    except Exception:
-        pass
-
-    # Control de fallos absoluto para que la UI no colapse jamás
     return ("Trastorno no encontrado", "N/A", "Criterios no disponibles.", "Guía no disponible.")
