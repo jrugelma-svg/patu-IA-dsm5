@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 
 # ==========================================
 # 1. CONFIGURACIÓN DE LA PÁGINA
@@ -14,15 +14,15 @@ st.title("🧠 Evaluador de Similitud Criterios DSM-5")
 st.write("Analiza el nivel de concordancia y similitud de un caso clínico con los trastornos del manual.")
 
 # ==========================================
-# 2. CONEXIÓN REAL CON GOOGLE GEMINI
+# 2. CONEXIÓN CON MOTOR GOOGLE TRADICIONAL
 # ==========================================
-# Tu clave API ya está colocada correctamente aquí adentro entre las comillas:
 API_KEY = "AQ.Ab8RN6LVcdf6oUMMsXSLF8x8o_-S0MpL_2Cxr9YTwsXpws1dng"
+genai.configure(api_key=API_KEY)
 
 def evaluar_similitud_dsm5(texto_caso):
     try:
-        # Inicializamos el cliente forzando la API v1 estable para evitar el error 404
-        client = genai.Client(api_key=API_KEY, http_options={'api_version': 'v1'})
+        # Usamos el modelo con mayor compatibilidad global
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt_clinico = f"""
         Actúa como un psicólogo clínico experto y un algoritmo de cribado psicopatológico.
@@ -40,11 +40,7 @@ def evaluar_similitud_dsm5(texto_caso):
         - No agregues introducciones, saludos, notas aclaratorias ni textos largos debajo de la tabla. Sé directo, puramente estadístico y cuantitativo.
         """
         
-        # Usamos el modelo ultra-estable de amplio soporte
-        response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt_clinico,
-        )
+        response = model.generate_content(prompt_clinico)
         return response.text
         
     except Exception as e:
