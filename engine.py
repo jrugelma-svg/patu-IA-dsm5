@@ -107,7 +107,7 @@ def extraer_raices(palabra):
     return palabra
 
 # =====================================================================
-# 3. LISTA DE PALABRAS VACÍAS (STOP WORDS) - ACTUALIZADA ANTI-ERROR
+# 3. LISTA DE PALABRAS VACÍAS (STOP WORDS) - ANTI FALSOS POSITIVOS
 # =====================================================================
 STOP_WORDS = {
     "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "a", "ante", 
@@ -119,7 +119,7 @@ STOP_WORDS = {
     "estas", "ese", "esa", "esos", "esas", "aquel", "aquella", "muy", "mucho", "poco", 
     "bastante", "tan", "asi", "siento", "tengo", "paciente", "persona", "sintoma", "sintomas",
     "doctor", "psicologo", "creo", "parece", "presenta", "sufre", "padece", "tiene",
-    # Palabras funcionales añadidas para evitar falsos positivos:
+    # Palabras de control de ruido añadidas:
     "actividades", "actividad", "realizo", "hago", "cosas", "cosa", "claras", "claro", 
     "poner", "hacer", "situacion", "casos", "momento", "dias", "tiempo", "forma"
 }
@@ -130,6 +130,8 @@ STOP_WORDS = {
 def analizar_caso_patu(descripcion_caso):
     """
     Analiza clínicamente la descripción del caso ingresado por el usuario.
+    Calcula un Score híbrido basado en expansión léxico-semántica y
+    cobertura de criterios del DSM-5.
     """
     if not descripcion_caso:
         return []
@@ -201,24 +203,59 @@ def analizar_caso_patu(descripcion_caso):
     return sorted(resultados, key=lambda x: x["coincidencia"], reverse=True)
 
 
+# =====================================================================
+# 5. CONSULTA DINÁMICA DE FICHAS TÉCNICAS (HÍBRIDA)
+# =====================================================================
 def consultar_guia_trastorno(trastorno_id):
     """
-    Recupera la ficha técnica y los criterios clínicos completos del DSM-5.
+    Recupera la ficha técnica y los criterios clínicos completos del DSM-5
+    directamente desde los módulos de datos estructurados .py (Producción),
+    evitando caídas operativas de SQLite en la nube.
     """
-    conn = sqlite3.connect("patu_db.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT nombre, categoria, descripcion_criterios, guia_diferencial 
-        FROM trastornos WHERE id = ?
-    """, (trastorno_id,))
-    fila = cursor.fetchone()
-    conn.close()
+    try:
+        from data.neuro_personalidad import TRASTORNOS_NEURO_PERS
+    except ImportError:
+        TRASTORNOS_NEURO_PERS = []
+        
+    try:
+        from data.afectivos_ansiedad import TRASTORNOS_AFEC_ANSI
+    except ImportError:
+        TRASTORNOS_AFEC_ANSI = []
+        
+    try:
+        from data.psicoticos_alimentarios import TRASTORNOS_PSIC_ALIM
+    except ImportError:
+        TRASTORNOS_PSIC_ALIM = []
 
-    if fila:
-        return {
-            "nombre": fila[0],
-            "categoria": fila[1],
-            "criterios": fila[2],
-            "diferencial": fila[3] if fila[3] else "No se dispone de guía diferencial específica en la base de datos."
-        }
-    return None
+    # Unificar base maestra de objetos .py
+    todos_los_trastornos = TRASTORNOS_NEURO_PERS + TRASTORNOS_AFEC_ANSI + TRASTORNOS_PSIC_ALIM
+
+    # Búsqueda directa en memoria por ID
+    for t in todos_los_trastornos:
+        if t.get("id") == trastorno_id:
+            nombre = t.get("nombre", "Desconocido")
+            categoria = t.get("categoria", "Sin categoría")
+            guia_diferencial = t.get("guia_diferencial", "No disponible.")
+            
+            criterios_lista = t.get("criterios", [])
+            descripcion_criterios = "\n".join([f"- **{cod}**: {txt}" for cod, txt in criterios_lista])
+            
+            return (nombre, categoria, descripcion_criterios, guia_diferencial)
+
+    # PLAN B: Respaldo relacional en Base de Datos local
+    try:
+        conn = sqlite3.connect("patu_db.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT nombre, categoria, descripcion_criterios, guia_diferencial 
+            FROM trastornos WHERE id = ?
+        """, (trastorno_id,))
+        fila = cursor.fetchone()
+        conn.close()
+        if fila:
+            return fila
+    except Exception:
+        pass
+
+    # Control de fallos absoluto para que la UI no colapse jamás
+    return ("Trastorno no encontrado", "N/A", "Criterios no disponibles.", "Guía no disponible.")
