@@ -1,7 +1,8 @@
 import streamlit as st
+from google import genai
 
 # ==========================================
-# 1. CONFIGURACIÓN DE LA PÁGINA Y TÍTULO
+# 1. CONFIGURACIÓN DE LA PÁGINA
 # ==========================================
 st.set_page_config(
     page_title="Asistente DSM-5",
@@ -9,49 +10,68 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🧠 Evaluador de Criterios Clínicos DSM-5")
-st.write("Herramienta de soporte y análisis de sintomatología basada en inteligencia artificial.")
+st.title("🧠 Evaluador de Similitud Criterios DSM-5")
+st.write("Analiza el nivel de concordancia y similitud de un caso clínico con los trastornos del manual.")
 
 # ==========================================
-# 2. FUNCIÓN DE ANÁLISIS (MOCK / SIMULACIÓN)
+# 2. CONEXIÓN REAL CON GOOGLE GEMINI
 # ==========================================
-# Nota: Modifica o vincula esta función con tu backend real de IA
-def analizar_caso_patu(texto_caso):
-    # Aquí iría la lógica de tu LLM o API
-    return "Análisis completado exitosamente con el modelo de IA."
+# Coloca aquí tu clave de API de Google AI Studio dentro de las comillas
+API_KEY = "AQ.Ab8RN6LVcdf6oUMMsXSLF8x8o_-S0MpL_2Cxr9YTwsXpws1dng"
+
+def evaluar_similitud_dsm5(texto_caso):
+    try:
+        client = genai.Client(api_key=API_KEY)
+        
+        prompt_clinico = f"""
+        Actúa como un psicólogo clínico experto y un algoritmo de cribado psicopatológico.
+        Analiza el siguiente motivo de consulta y calcula numéricamente el porcentaje de similitud o concordancia con los trastornos del DSM-5 que tengan más coincidencia.
+        
+        Caso clínico a evaluar:
+        "{texto_caso}"
+        
+        Tu respuesta debe ser exclusivamente una tabla en formato Markdown con las siguientes columnas:
+        | Trastorno Sospechado (DSM-5) | % Similitud | Criterios Clave Coincidentes | Justificación Breve |
+        
+        Reglas estrictas:
+        - Ordena la tabla de mayor a menor porcentaje.
+        - Incluye de 2 a 4 trastornos diferenciales que muestren alguna similitud.
+        - No agregues introducciones, saludos ni textos largos debajo de la tabla. Sé directo y cuantitativo.
+        """
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt_clinico,
+        )
+        return response.text
+        
+    except Exception as e:
+        return f"❌ Error en el motor de análisis: {str(e)}"
 
 # ==========================================
-# 3. INTERFAZ GRÁFICA Y PESTAÑAS (TABS)
+# 3. INTERFAZ GRÁFICA (TABS)
 # ==========================================
 tabs = st.tabs(["Análisis de Caso", "Historial", "Configuración"])
 
 with tabs[0]:
-    st.header("📝 Análisis de Caso Clínico")
-    st.write("Ingresa el reporte de la entrevista clínica, anamnesis o motivo de consulta detallado para evaluar su concordancia con los criterios del DSM-5.")
+    st.header("📝 Matriz de Concordancia Clínica")
+    st.write("Introduce el motivo de consulta para evaluar estadísticamente los trastornos con mayor índice de similitud.")
     
-    # Bloque del área de texto perfectamente tabulado
     caso_clinico = st.text_area(
         label="Descripción formal del caso / Notas de la Entrevista Clínica:",
-        placeholder=(
-            "Ejemplo de uso profesional:\n"
-            "Paciente masculino de 24 años refiere un estado de ánimo deprimido la mayor parte del día, "
-            "manifestado por llanto frecuente reportado por familiares. Presenta una marcada disminución "
-            "del interés o placer por casi todas las actividades habituales (anhedonia) que ha persistido "
-            "durante las últimas 3 semanas, acompañado de insomnio de conciliación, fatiga diaria y dificultades "
-            "para concentrarse en sus actividades laborales..."
-        ),
+        placeholder="Pega aquí el caso clínico para calcular sus similitudes...",
         height=200
     )
     
-    # Bloque de ejecución del botón perfectamente alineado
-    if st.button("🚀 Evaluar Sintomatología"):
+    if st.button("📊 Calcular Similitud Diagnóstica"):
         if caso_clinico.strip() == "":
-            st.warning("Por favor, ingresa una descripción válida para realizar el análisis.")
+            st.warning("Por favor, ingresa un texto para realizar la evaluación.")
         else:
-            with st.spinner("Analizando concordancias con los criterios oficiales del DSM-5..."):
-                resultados = analizar_caso_patu(caso_clinico)
-                st.success("¡Análisis finalizado!")
-                st.write(resultados)
+            with st.spinner("Calculando índices de similitud con el DSM-5..."):
+                # Aquí llamamos a la nueva función matemática/clínica
+                tabla_resultados = evaluar_similitud_dsm5(caso_clinico)
+                st.success("¡Cálculo de similitud finalizado!")
+                st.markdown(tabla_resultados)
 
 with tabs[1]:
     st.header("⏳ Historial de Evaluaciones")
