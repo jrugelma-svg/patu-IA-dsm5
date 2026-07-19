@@ -34,8 +34,8 @@ tabs = st.tabs(["🟢 MODO GRATUITO (Aprende y Diagnóstica)", "👑 MODO PREMIU
 # PANEL 1: MODO GRATUITO (Motor de Scoring Avanzado)
 # ---------------------------------------------------------------------
 with tabs[0]:
-    st.header("📝 Análisis de Caso Clínico")
-  st.write("Ingresa el reporte de la entrevista clínica, anamnesis o motivo de consulta detallado para evaluar su concordancia con los criterios del DSM-5.")
+        st.header("📝 Análisis de Caso Clínico")
+        st.write("Ingresa el reporte de la entrevista clínica, anamnesis o motivo de consulta detallado para evaluar su concordancia con los criterios del DSM-5.")
     
 caso_clinico = st.text_area(
             label="Descripción formal del caso / Notas de la Entrevista Clínica:",
