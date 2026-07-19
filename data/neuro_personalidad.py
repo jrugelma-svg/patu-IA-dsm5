@@ -1,8 +1,7 @@
 # neuro_personalidad.py
 # ARCHIVO DE PRODUCCIÓN TOTALMENTE CONFIGURADO
 
-TRASTORNOS_NEURO_PERS = [
-    {
+TRASTORNOS_NEURO_PERSONALIDAD = [
         "id": 1,
         "nombre": "Trastorno del Espectro del Autismo (TEA)",
         "cie10": "F84.0",
