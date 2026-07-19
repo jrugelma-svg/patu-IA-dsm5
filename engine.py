@@ -112,20 +112,20 @@ def extraer_raices(palabra):
 STOP_WORDS = {
     "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "a", "ante", 
     "bajo", "cabe", "con", "contra", "desde", "en", "entre", "hacia", "hasta", "para", 
-    "por", "segun", "sin", "so", "sobre", "tras", "y", "o", "u", "pero", "mas", "e", 
-    "que", "porque", "como", "cuando", "donde", "quien", "cual", "cuyo", "mi", "mis", 
-    "tu", "tus", "su", "sus", "nuestro", "nuestra", "me", "te", "se", "nos", "lo", "le", 
-    "les", "yo", "tu", "el", "ella", "ellos", "ellas", "nosotros", "este", "esta", "estos", 
-    "estas", "ese", "esa", "esos", "esas", "aquel", "aquella", "muy", "mucho", "poco", 
+    "por", "segun", "sin", "so", "sobre", "tras", "y", "o", "u", "pero", "mas", "e",
+    "que", "porque", "como", "cuando", "donde", "quien", "cual", "cuyo", "mi", "mis",
+    "tu", "tus", "su", "sus", "nuestro", "nuestra", "me", "te", "se", "nos", "lo", "le",
+    "les", "yo", "tu", "el", "ella", "ellos", "ellas", "nosotros", "este", "esta", "estos",
+    "estas", "ese", "esa", "esos", "esas", "aquel", "aquella", "muy", "mucho", "poco",
     "bastante", "tan", "asi", "siento", "tengo", "paciente", "persona", "sintoma", "sintomas",
     "doctor", "psicologo", "creo", "parece", "presenta", "sufre", "padece", "tiene",
     # Palabras de control de ruido añadidas:
-    "actividades", "actividad", "realizo", "hago", "cosas", "cosa", "claras", "claro", 
-    "poner", "hacer", "situacion", "casos", "momento", "dias", "tiempo", "forma"
+    "actividades", "actividad", "realizo", "hago", "cosas", "cosa", "claras", "claro",
+    "poner", "hacer", "situacion", "casos", "momento", "dias", "tiempo", "forma", "interes"
 }
 
 # =====================================================================
-# 4. MOTOR DE ANALÍTICA Y CÁLCULO DE RELEVANCIA (SCORING)
+# 4. MOTOR DE ANALÍTICA AJUSTADO CON BONIFICACIÓN CLÍNICA
 # =====================================================================
 def analizar_caso_patu(descripcion_caso):
     if not descripcion_caso:
@@ -136,7 +136,15 @@ def analizar_caso_patu(descripcion_caso):
 
     # Construimos el set de búsqueda léxica del usuario
     tokens_busqueda = set()
+    es_caso_afectivo = False
+    
+    # Palabras clave críticas de alta carga afectiva/depresiva
+    palabras_clave_depresivas = {"triste", "lloro", "llanto", "deprimido", "vacio", "placer", "anhedonia"}
+
     for pal in palabras_usuario:
+        if pal in palabras_clave_depresivas:
+            es_caso_afectivo = True
+            
         if pal not in STOP_WORDS:
             tokens_busqueda.add(pal)
             tokens_busqueda.add(extraer_raices(pal))
@@ -161,7 +169,7 @@ def analizar_caso_patu(descripcion_caso):
         if not criterios:
             continue
         
-        # Separar en criterios individuales basados en el punto final de cada uno
+        # Separar en criterios individuales basados en el punto final
         lista_criterios = [normalizar_texto(c) for c in criterios.split('.') if len(c.strip()) > 6]
         criterios_activados = 0
         
@@ -169,20 +177,30 @@ def analizar_caso_patu(descripcion_caso):
             criterio_tokens = set(criterio.split())
             criterio_raices = {extraer_raices(w) for w in criterio_tokens if w not in STOP_WORDS}
             
-            # Buscamos si hay intersección real de conceptos únicos entre el caso y el criterio
+            # Intersección real de conceptos únicos
             coincidencias_reales = tokens_busqueda.intersection(criterio_tokens).union(tokens_busqueda.intersection(criterio_raices))
             
-            # Suma el criterio solo si comparte al menos una palabra clave de peso clínico real
             if len(coincidencias_reales) >= 1:
                 criterios_activados += 1
 
         if criterios_activados == 0 or len(lista_criterios) == 0:
             continue
             
-        # Ponderación basada estrictamente en la proporción de criterios cubiertos
-        porcentaje_coincidencia = round((criterios_activados / len(lista_criterios)) * 100, 2)
+        # Ponderación base
+        porcentaje_coincidencia = (criterios_activados / len(lista_criterios)) * 100
 
-        if porcentaje_coincidencia >= 10.0:
+        # --- SISTEMA DE PONDERACIÓN INTELIGENTE (RE-BALANCEO CLÍNICO) ---
+        # 1. Si el usuario describe síntomas de llanto/tristeza, bonificamos la categoría afectiva
+        if es_caso_afectivo and "Afectivos" in categoria:
+            porcentaje_coincidencia += 35.0  # Impulso clínico por relevancia temática
+            
+        # 2. Penalizar ruido cruzado de "intereses" en trastornos del desarrollo si hay llanto explícito
+        if es_caso_afectivo and "Autismo" in nombre:
+            porcentaje_coincidencia -= 20.0
+
+        porcentaje_coincidencia = min(round(porcentaje_coincidencia, 2), 100.0)
+
+        if porcentaje_coincidencia >= 15.0:
             resultados.append({
                 "id": t_id,
                 "nombre": nombre,
