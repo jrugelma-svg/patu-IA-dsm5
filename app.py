@@ -35,14 +35,20 @@ tabs = st.tabs(["🟢 MODO GRATUITO (Aprende y Diagnóstica)", "👑 MODO PREMIU
 # ---------------------------------------------------------------------
 with tabs[0]:
     st.header("📝 Análisis de Caso Clínico")
-    st.write("Ingresa la descripción del paciente (puedes usar lenguaje coloquial, metáforas o síntomas directos).")
+  st.write("Ingresa el reporte de la entrevista clínica, anamnesis o motivo de consulta detallado para evaluar su concordancia con los criterios del DSM-5.")
     
-    caso_clinico = st.text_area(
-        label="Descripción del caso:",
-        placeholder="Ejemplo: Paciente que se siente muy triste todo el tiempo, no tiene ganas de hacer nada, ha perdido el placer en sus hobbies y no duerme bien en las noches...",
-        height=150
-    )
-    
+caso_clinico = st.text_area(
+            label="Descripción formal del caso / Notas de la Entrevista Clínica:",
+            placeholder=(
+                "Ejemplo de uso profesional:\n"
+                "Paciente masculino de 24 años refiere un estado de ánimo deprimido la mayor parte del día, "
+                "manifestado por llanto frecuente reportado por familiares. Presenta una marcada disminución "
+                "del interés o placer por casi todas las actividades habituales (anhedonia) que ha persistido "
+                "durante las últimas 3 semanas, acompañado de insomnio de conciliación, fatiga diaria y dificultades "
+                "para concentrarse en sus actividades laborales..."
+            ),
+            height=200
+        )
     if st.button("🚀 Evaluar Sintomatología"):
         if caso_clinico.strip() == "":
             st.warning("Por favor, ingresa una descripción válida para realizar el análisis.")
